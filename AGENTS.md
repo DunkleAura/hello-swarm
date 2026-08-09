@@ -20,5 +20,6 @@
 - The server is stateless. Replica discovery happens only in the browser's in-memory map; do not add server-side aggregation or a Docker socket dependency.
 - Replica state advances only on successful `/api/info` responses. Failed or paused polls provide no evidence about an individual replica and must not age it toward offline.
 - `/api/info` must remain uncached and close HTTP/1.1 connections. Swarm balances connections rather than individual requests, so connection reuse can prevent discovery of other replicas.
-- Swarm-only templates and replica settings live in `compose.swarm.yaml`; local `docker compose up --build` uses `compose.yaml` alone to avoid fixed-port conflicts.
+- `compose.yaml` pulls the published image for one local instance; use `IMAGE=hello-swarm VERSION=dev PULL_POLICY=never` with `make docker-build` for source builds.
+- `compose.swarm.yaml` is a standalone three-replica stack manifest. Do not merge it with `compose.yaml`; deploy it directly with `docker stack deploy -c compose.swarm.yaml hello`.
 - The image healthcheck invokes the same binary as `hello-swarm healthcheck`; if `HTTP_ADDR` changes from port 8080, update `HEALTHCHECK_URL` too.

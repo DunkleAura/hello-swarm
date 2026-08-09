@@ -1,10 +1,21 @@
 services:
   app:
+    image: ${IMAGE:-ghcr.io/dunkleaura/hello-swarm}:${VERSION:-latest}
     environment:
+      HTTP_ADDR: ":8080"
+      HEALTHCHECK_URL: "http://127.0.0.1:8080/healthz"
       SWARM_NODE_NAME: "{{.Node.Hostname}}"
       SWARM_SERVICE_NAME: "{{.Service.Name}}"
       SWARM_TASK_NAME: "{{.Task.Name}}"
       SWARM_TASK_SLOT: "{{.Task.Slot}}"
+    ports:
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: ingress
+    read_only: true
+    cap_drop:
+      - ALL
     deploy:
       mode: replicated
       replicas: 3
