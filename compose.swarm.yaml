@@ -1,0 +1,15 @@
+services:
+  app:
+    environment:
+      SWARM_NODE_NAME: "{{.Node.Hostname}}"
+      SWARM_SERVICE_NAME: "{{.Service.Name}}"
+      SWARM_TASK_NAME: "{{.Task.Name}}"
+      SWARM_TASK_SLOT: "{{.Task.Slot}}"
+    deploy:
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      update_config:
+        order: start-first
+        parallelism: 1
