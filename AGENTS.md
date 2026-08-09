@@ -5,12 +5,13 @@
 - Run `make check` for the required order: formatting check, `go vet`, tests, then a CGO-free build. A focused handler test is `go test -run TestInfoEndpoint ./...`.
 - The local toolchain must be Go 1.24 or newer. `Dockerfile` pins the builder to Go 1.24.5 and also runs tests.
 - Embed releases with `VERSION=x.y.z make build`; changing the version intentionally changes the otherwise reproducible binary.
-- `.github/workflows/ci.yml` checks `main` and pull requests without publishing. `.github/workflows/release.yml` is the only GHCR publisher.
+- `.github/workflows/ci.yml` checks `main` and pull requests without publishing. `.github/workflows/release.yml` is the only GHCR publisher and creates the matching GitHub Release after a successful image push.
 
 ## Releases
 
 - Stable Git tags use `vMAJOR.MINOR.PATCH`; the workflow embeds the version without `v` and publishes `ghcr.io/dunkleaura/hello-swarm` for amd64 and arm64.
 - A release publishes exact (`0.1.0`), minor (`0.1`), and `latest` tags. Do not publish a floating `0` tag or publish `main`; exact version tags are immutable.
+- GitHub Releases contain generated notes, image references, and the multi-arch digest; standalone binaries are not attached.
 - Release commits must belong to `main`. The first GHCR package version must be made public manually in GitHub's package settings.
 
 ## Runtime Design

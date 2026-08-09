@@ -6,7 +6,7 @@ on:
       - "v*.*.*"
 
 permissions:
-  contents: read
+  contents: write
   packages: write
   id-token: write
 
@@ -40,7 +40,9 @@ jobs:
             echo "Release commit must be part of main" >&2
             exit 1
           fi
-          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          version="${GITHUB_REF_NAME#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "minor=${version%.*}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -87,6 +89,7 @@ jobs:
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
 
       - name: Build and publish image
+        id: image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -99,3 +102,24 @@ jobs:
           cache-to: type=gha,mode=max,scope=release
           provenance: mode=max
           sbom: true
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          MINOR: ${{ steps.version.outputs.minor }}
+          IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
+        shell: bash
+        run: |
+          printf -v notes "## Container image\n\n- \`%s:%s\`\n- \`%s:%s\`\n- \`%s:latest\`\n- \`%s@%s\`\n" \
+            "$IMAGE_NAME" "$VERSION" \
+            "$IMAGE_NAME" "$MINOR" \
+            "$IMAGE_NAME" \
+            "$IMAGE_NAME" "$IMAGE_DIGEST"
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Hello Swarm $VERSION" \
+            --notes "$notes" \
+            --generate-notes \
+            --latest

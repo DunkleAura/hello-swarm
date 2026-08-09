@@ -105,7 +105,9 @@ ghcr.io/dunkleaura/hello-swarm:0.1
 ghcr.io/dunkleaura/hello-swarm:latest
 ```
 
-Der exakte Image-Tag darf nicht bereits existieren. Release-Tags muessen auf einen Commit in `main` zeigen. Pull Requests und Pushes auf `main` durchlaufen `make check` sowie einen nicht veroeffentlichten Multi-Arch-Docker-Build.
+Nach erfolgreichem Image-Push erstellt derselbe Workflow ein GitHub Release mit dem Titel `Hello Swarm 0.1.0`. Es enthaelt automatisch generierte Release Notes, alle drei Image-Tags und den unveraenderlichen Multi-Arch-Digest. Es werden keine separaten Binary-Dateien angehaengt.
+
+Der exakte Image-Tag darf nicht bereits existieren. Release-Tags muessen auf einen Commit in `main` zeigen. Pull Requests und Pushes auf `main` durchlaufen `make check` sowie einen nicht veroeffentlichten Multi-Arch-Docker-Build. Schlaegt Test oder Image-Push fehl, wird kein GitHub Release erstellt.
 
 Nach dem ersten Release muss das GHCR-Package einmalig in den GitHub Package Settings auf `Public` gestellt werden. Das Image traegt OCI-Labels fuer Quell-Repository, Commit und Version sowie SBOM- und Provenance-Attestations.
 
